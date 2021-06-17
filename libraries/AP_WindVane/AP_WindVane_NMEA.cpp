@@ -132,10 +132,12 @@ bool AP_WindVane_NMEA::decode_latest_term()
     if (_term_is_checksum) {
         _sentence_done = true;
         uint8_t checksum = 16 * char_to_hex(_term[0]) + char_to_hex(_term[1]);
+        // uint8_t checksum = 16 * char_to_hex(_term[1]) + char_to_hex(_term[2]); //handle checksum if there is a leading zero in checksum
         return ((checksum == _checksum) && _sentence_valid);
     }
 
     // the first term determines the sentence type
+    //Sean, this is what we need to change
     if (_term_number == 0) {
         // the first two letters of the NMEA term are the talker ID.
         // we accept any two characters here.
@@ -145,7 +147,7 @@ bool AP_WindVane_NMEA::decode_latest_term()
             return false;
         }
         const char *term_type = &_term[2];
-        if (strcmp(term_type, "MWV") == 0) {
+        if (strcmp(term_type, "MWV") == 0 || strcmp(term_type, "WIMWV") == 0) {
             // we found the sentence type for wind
             _sentence_valid = true;
         }
